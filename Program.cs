@@ -64,15 +64,13 @@ namespace ReglaUse
         {
             var customer = (Customer)input;
             var customerDiscount = (CustomerDiscount)output;
-            if ((DateTime.Today - customer.FirstPurchase).Days / 365 < Years)
+            if ((DateTime.Today - customer.FirstPurchase).Days / 365 > Years)
                 customerDiscount.Discount = Math.Max(customerDiscount.Discount, 50);
-            else
-                throw new Exception("Not too old");
             return true;
         }
     }
 
-    class Program
+    class RulesEngineDemo
     {
         /**
          * One of the rules created as simple method
@@ -95,14 +93,59 @@ namespace ReglaUse
             return true;
         }
 
-
         static bool falseRule(object component, object output)
         {
             Console.WriteLine("falseRule");
             return false;
         }
 
-        public static void Main()
+        static void BasicExample()
+        {
+            // Create an empty RulesEngine
+            var myRules = new RulesEngine();
+
+            // Add a lambda rule to the engine
+            myRules.AddRule(new Rule((component, output) => { Console.WriteLine("Hello, world"); return true; }));
+
+            // Run the engine, it will print Hello, world
+            var result = myRules.RunAllRules();
+            // Hello, world
+
+            // Result class contains detailed object graph
+            // Which can be accessed thru properties
+            // It's ToString() returns a Json string
+            Console.WriteLine(result);
+
+        }
+
+        // Define a rule delegate method
+        static bool ruleDelegate(object component, object output)
+        {
+            Console.WriteLine("ruleDelegate called");
+            return false;
+        }
+
+        static void DelegateExample()
+        {
+            // Create EngineAttributes with Name
+            var engineOptions = new EngineAttributes { Name = "MyEngine" };
+
+            // Instantiate the RulesEngine with option
+            var myEngine = new RulesEngine(engineOptions);
+
+            // Now add Lambda rule
+            myEngine.AddRule(new Rule((c, o) => { Console.WriteLine("Hello, world"); return true; }));
+
+            // Next, add a delegate method
+            myEngine.AddRule(new Rule(ruleDelegate));
+
+            myEngine.RunAllRules();
+            // Output:
+            // Hello, world
+            // ruleDelegate called
+        }
+
+        static void RuleClassExample()
         {
             /**
              * Create the component to initialize the RulesEngine
@@ -131,48 +174,19 @@ namespace ReglaUse
             // Start the engine with attributes and initial rules list
             var engine = new RulesEngine(engineAttributes, rulesArray);
 
-            // Add more rules dynamically
-            engine.AddRule(new LoyaltyDiscount(1, 5));
+            // We are adding multiple rules based on the same class, so we must name them explicitly
+            engine.AddRule(new Rule(new LoyaltyDiscount(1, 5), ruleName: "L1"));
+            engine.AddRule(new Rule(new LoyaltyDiscount(5, 8), ruleName: "L2"));
+            engine.AddRule(new Rule(new LoyaltyDiscount(10, 10), ruleName: "L3"));
 
-            // Rules can be class objects, methods or even lambdas
-            engine.AddRule(new Rule((input, output) => { return false; }, ruleName: "Lambda", ruleGroupName: "L1", stopOnRuleFailure: true));
+            Console.WriteLine(engine.RunAllRules());
+        }
 
-            // We can override the stop condition on a per rule bases
-            engine.AddRule(new Rule((input, output) => { throw new Exception("lambda failed"); }, ruleName: "Lambda2", ruleGroupName: "L1", stopOnRuleFailure: false));
-
-            System.Console.WriteLine(engine);
-
-            // We can run all rules or named/group rules
-            var result = engine.RunAllRules();
-
-            // Result object has an object graph, but we can also print it as json
-            Console.WriteLine("Result of RunAllRules()");
-            Console.WriteLine(result);
-
-            // Run Grouped Rules
-            result = engine.RunGroupRules("L1");
-            Console.WriteLine("Result of RunGroupRules()");
-            Console.WriteLine(result);
-
-            // Run specific named rules
-            result = engine.RunNamedRules(new string[] { "Senior", "Lambda" });
-            Console.WriteLine("Result of RunGroupRules()");
-            Console.WriteLine(result);
-
-            if (engine.RemoveRule("Lambda"))
-                System.Console.WriteLine("Rule Lambda removed");
-
-            if (engine.RemoveRule(seniorCitizenDiscount))
-                System.Console.WriteLine("Rule seniorCitizenDiscount removed");
-
-            System.Console.WriteLine("Remove group L1 " + engine.RemoveGroup("L1"));
-
-            engine.ClearRules();
-            engine.AddAndRules(ruleName: "AndRule", new Rule(falseRule), new Rule(trueRule));
-            engine.ClearRules();
-            engine.AddOrRules(ruleName: "OrRule", new Rule(trueRule), new Rule(falseRule));
-            result = engine.RunAllRules();
-            Console.WriteLine(result);
+        public static void Main()
+        {
+            BasicExample();
+            DelegateExample();
+            RuleClassExample();
         }
     }
 }

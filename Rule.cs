@@ -10,6 +10,8 @@ using System.Data;
  *      Rule -> holds callback method and attributes
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 4.57: Added ctor Rule(Rule rule, ...)
+ *   [SV] 2019-Dec-19 4.52: Fixed setNameMethod for RuleClass objects
  *   [SV] 2019-Dec-19 2.06: Added OrRule class
  *   [SV] 2019-Dec-19 2.06: Added AndRule class
  *   [SV] 2019-Dec-19 1.33: Created
@@ -91,7 +93,16 @@ namespace Regla
                  * In that case, find out the class name of the constructor and set it as ruleName
                  */
                 if (ruleName == null)
-                    return new StackFrame(1).GetMethod().DeclaringType.Name;
+                {
+                    string name;
+                    int m = 1;
+                    name = new StackFrame(1).GetMethod().DeclaringType.Name;
+                    while (name == "Rule")
+                    {
+                        name = new StackFrame(++m).GetMethod().DeclaringType.Name;
+                    }
+                    return name;
+                }
 
             }
             return ruleName;
@@ -124,6 +135,11 @@ namespace Regla
          */
         public Rule(RuleMethod method = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
             : this(method, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        {
+        }
+
+        public Rule(Rule rule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : this(rule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 

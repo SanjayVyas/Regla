@@ -10,6 +10,10 @@
  *          (object to operate on, output object, options etc)
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 4.12: Added RemoveRule(Rule)
+ *   [SV] 2019-Dec-19 3.44: Converted Rules array to params in ctor of Engine
+ *   [SV] 2019-Dec-19 3.18: Fixed bug on empty Rules array in Engine ctor
+ *   [SV] 2019-Dec-19 3.09: Resolved ctor conflict for default arguments
  *   [SV] 2019-Dec-19 2.34: Fixed Engine Count which was incrementing twice
  *   [SV] 2019-Dec-19 2.09: Added AddOrRule method
  *   [SV] 2019-Dec-19 2.03: Added clearRules to remove all rules
@@ -43,7 +47,7 @@ namespace Regla
     public class EngineAttributes : ReglaAttributes
     {
         private static int _engineCount = 0;
-        public string Name { set; get; } 
+        public string Name { set; get; }
         public bool StopOnException { set; get; } = true;
         public bool StopOnRuleFailure { set; get; } = false;
         public object Component { set; get; } = null;
@@ -74,13 +78,14 @@ namespace Regla
         public EngineAttributes EngineAttributes { private set; get; }
         public RulesList RulesList { private set; get; } = new RulesList();
 
-        public RulesEngine(EngineAttributes engineAttributes = null, Rule[] rulesArray = null)
+        public RulesEngine(EngineAttributes engineAttributes = null, params Rule[] rulesArray)
         {
             EngineAttributes = (engineAttributes == null ? new EngineAttributes() : engineAttributes);
-            RulesList.AddRange(rulesArray);
+            if (rulesArray != null)
+                RulesList.AddRange(rulesArray);
         }
 
-        public RulesEngine(object component = null, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
+        public RulesEngine(object component, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
             => EngineAttributes = new EngineAttributes(component, output, name, stopOnException, stopOnRuleFailure);
 
         public override string ToString()
@@ -148,6 +153,11 @@ namespace Regla
         public bool RemoveRule(RuleMethod ruleMethod)
         {
             return 1 == RulesList.RemoveAll(rule => rule.RuleMethod == ruleMethod);
+        }
+
+        public bool RemoveRule(Rule rule)
+        {
+            return RulesList.Remove(rule);
         }
 
         /**
