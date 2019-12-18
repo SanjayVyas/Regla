@@ -64,7 +64,7 @@ namespace Regla
      */
     public class Rule
     {
-        public RuleMethod RuleMethod { protected set; get; }
+        public virtual RuleMethod RuleMethod { protected set; get; }
         public RuleAttributes RuleAttributes { set; get; }
 
         /**
@@ -133,6 +133,12 @@ namespace Regla
         }
     }
 
+    /**
+     * Class to implement adn short circuiting
+     * 
+     * AndRule will continue executing rules until one returns false
+     * If non return false, the final outcome is true
+     */
     internal class AndRule : Rule
     {
         Rule[] andRules = null;
@@ -157,9 +163,16 @@ namespace Regla
         }
     }
 
+    /**
+     * Class to implement short circuiting rule
+     * 
+     * OrRule will continue executing rules until one returns true
+     * If none return true, the final outcome is false
+     */
     internal class OrRule : Rule
     {
-        Rule[] orRules = null;
+        public override RuleMethod RuleMethod { protected set; get; }
+        public Rule[] orRules { private set; get; } = null;
 
         private bool orMethod(object component, object output)
         {
