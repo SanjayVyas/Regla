@@ -177,7 +177,7 @@ As we have seen, we can easily pass a method or lambda to the Rules Engine, but 
      */
     class CustomerDiscount
     {
-        public decimal Discount { get; set; } = 5;
+        public decimal Discount { get; set; };
     }
 
     /**
@@ -209,10 +209,8 @@ As we have seen, we can easily pass a method or lambda to the Rules Engine, but 
         {
             var customer = (Customer)input;
             var customerDiscount = (CustomerDiscount)output;
-            if ((DateTime.Today - customer.FirstPurchase).Days / 365 < Years)
+            if ((DateTime.Today - customer.FirstPurchase).Days / 365 > Years)
                 customerDiscount.Discount = Math.Max(customerDiscount.Discount, 50);
-            else
-                throw new Exception("Not too old");
             return true;
         }
     }
