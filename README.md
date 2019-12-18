@@ -116,7 +116,7 @@ class RulesEngineDemo
 //   ]
 // }
 ```
-While the output looks very details, we don't have to worry about it yet. The Result object graph can be used to analyze and debug our RulesEngine
+While the output looks very detailed, we don't have to worry about it yet. The Result object graph can be used to analyze and debug our RulesEngine
 
 ### Different ways of specifying rule
 Rules can be delegates, Func<>, lambda or even classes

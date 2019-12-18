@@ -7,6 +7,7 @@
  * This is a test program for Regla RulesEngine
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 5.10: Reorganized the program structure to modular 
  *   [SV] 2019-Dec-19 1.13: Created
  *-----------------------------------------------------------------------------
  */
