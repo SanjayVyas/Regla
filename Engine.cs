@@ -1,3 +1,4 @@
+using System.Text;
 using System;
 using System.Collections.Generic;
 
@@ -69,6 +70,10 @@ namespace Regla
         public RulesEngine(object component = null, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
             => EngineAttributes = new EngineAttributes(component, output, name, stopOnException, stopOnRuleFailure);
 
+        public override string ToString()
+        {
+            return "\"Engine\": " + ReglaHelper.ToJson(this);
+        }
         /** 
          * Check for duplicate name before adding a new Rule with ruleName
          */

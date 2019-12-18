@@ -115,6 +115,8 @@ namespace ReglaUse
             engine.AddRule(new Rule((input, output) => { throw new Exception("lambda failed"); }, ruleName: "Lambda2", ruleGroupName: "L1", stopOnRuleFailure: false));
 
 
+            System.Console.WriteLine(engine);
+
             // We can run all rules or named/group rules
             var result = engine.RunAllRules();
 
@@ -140,7 +142,6 @@ namespace ReglaUse
                 System.Console.WriteLine("Rule seniorCitizenDiscount removed");
 
             System.Console.WriteLine("Remove group L1 " + engine.RemoveGroup("L1"));
-
 
 
         }
