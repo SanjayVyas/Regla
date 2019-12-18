@@ -1,3 +1,4 @@
+using System.Data;
 /**
  *-----------------------------------------------------------------------------
  * File:      Rule.cs
@@ -9,6 +10,8 @@
  *      Rule -> holds callback method and attributes
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 2.06: Added OrRule class
+ *   [SV] 2019-Dec-19 2.06: Added AndRule class
  *   [SV] 2019-Dec-19 1.33: Created
  *-----------------------------------------------------------------------------
  */
@@ -126,7 +129,56 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"Rule\": " + ReglaHelper.ToJson(this); 
+            return "\"Rule\": " + ReglaHelper.ToJson(this);
+        }
+    }
+
+    internal class AndRule : Rule
+    {
+        Rule[] andRules = null;
+
+        private bool andMethod(object component, object output)
+        {
+            bool result = false;
+            foreach (var rule in andRules)
+            {
+                result = rule.RuleMethod(component, output);
+                if (result == false)
+                    return false;
+            }
+            return true;
+        }
+
+        public AndRule(string ruleName = null, params Rule[] rulesArray)
+            : base(null, ruleName)
+        {
+            RuleMethod = andMethod;
+            andRules = rulesArray;
+        }
+    }
+
+    internal class OrRule : Rule
+    {
+        Rule[] orRules = null;
+
+        private bool orMethod(object component, object output)
+        {
+            bool result = false;
+            foreach (var rule in orRules)
+            {
+                result = rule.RuleMethod(component, output);
+                if (result == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public OrRule(string ruleName = null, params Rule[] rulesArray)
+            : base(null, ruleName)
+        {
+            RuleMethod = orMethod;
+            orRules = rulesArray;
         }
     }
 }

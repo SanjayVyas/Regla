@@ -10,6 +10,9 @@
  *          (object to operate on, output object, options etc)
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 2.09: Added AddOrRule method
+ *   [SV] 2019-Dec-19 2.03: Added clearRules to remove all rules
+ *   [SV] 2019-Dec-19 1.53: Added AddAndRule class
  *   [SV] 2019-Dec-19 1.14: Created
  *-----------------------------------------------------------------------------
  */
@@ -107,11 +110,27 @@ namespace Regla
             return this;
         }
 
-        public RulesEngine AddRule(Rule[] rules)
+        public RulesEngine AddRule(params Rule[] rules)
         {
             foreach (var rule in rules)
                 AddRule(rule);
             return this;
+        }
+
+        /**
+         * AddAndRule adds AndRule class which short circuits of false rule
+         */
+        public RulesEngine AddAndRules(string ruleName = null, params Rule[] rules)
+        {
+            return AddRule(new AndRule(ruleName, rules));
+        }
+
+        /**
+         * AndOrRule adds OrRule class which short circuits on true rule
+         */
+        public RulesEngine AddOrRules(string ruleName = null, params Rule[] rules)
+        {
+            return AddRule(new OrRule(ruleName, rules));
         }
 
         /**
@@ -136,6 +155,16 @@ namespace Regla
         public int RemoveGroup(string groupName)
         {
             return RulesList.RemoveAll(rule => rule.RuleAttributes.Group.Trim().ToLower() == groupName.Trim().ToLower());
+        }
+
+        /**
+         * Clear all rules from the RuleList
+         */
+        public int ClearRules()
+        {
+            int count = RulesList.Count;
+            RulesList.Clear();
+            return count;
         }
 
         /**

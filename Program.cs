@@ -89,6 +89,19 @@ namespace ReglaUse
             return true;
         }
 
+        static bool trueRule(object component, object output)
+        {
+            Console.WriteLine("trueRule");
+            return true;
+        }
+
+
+        static bool falseRule(object component, object output)
+        {
+            Console.WriteLine("falseRule");
+            return false;
+        }
+
         public static void Main()
         {
             /**
@@ -153,6 +166,13 @@ namespace ReglaUse
                 System.Console.WriteLine("Rule seniorCitizenDiscount removed");
 
             System.Console.WriteLine("Remove group L1 " + engine.RemoveGroup("L1"));
+
+            engine.ClearRules();
+            engine.AddAndRules(ruleName: "AndRule", new Rule(falseRule), new Rule(trueRule));
+            engine.ClearRules();
+            engine.AddOrRules(ruleName: "OrRule", new Rule(trueRule), new Rule(falseRule));
+            result = engine.RunAllRules();
+            Console.WriteLine(result);
         }
     }
 }
