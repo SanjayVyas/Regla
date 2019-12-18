@@ -123,7 +123,7 @@ namespace ReglaUse
             var discount = new CustomerDiscount();
 
             // Create Engine Attributes
-            var engineAttributes = new EngineAttributes { Name = "MyEngine", Component = bigB, Output = discount };
+            var engineAttributes = new EngineAttributes { Component = bigB, Output = discount };
 
             // We can add individual rules or an array of rules
             var rulesArray = new Rule[] { new Rule(seniorCitizenDiscount, ruleName: "Senior") };

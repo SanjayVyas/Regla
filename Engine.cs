@@ -10,6 +10,7 @@
  *          (object to operate on, output object, options etc)
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 2.34: Fixed Engine Count which was incrementing twice
  *   [SV] 2019-Dec-19 2.09: Added AddOrRule method
  *   [SV] 2019-Dec-19 2.03: Added clearRules to remove all rules
  *   [SV] 2019-Dec-19 1.53: Added AddAndRule class
@@ -42,7 +43,7 @@ namespace Regla
     public class EngineAttributes : ReglaAttributes
     {
         private static int _engineCount = 0;
-        public string Name { set; get; } = "Engine_" + ++_engineCount;
+        public string Name { set; get; } 
         public bool StopOnException { set; get; } = true;
         public bool StopOnRuleFailure { set; get; } = false;
         public object Component { set; get; } = null;
