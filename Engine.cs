@@ -9,6 +9,7 @@ using System.Collections.Generic;
 namespace Regla
 {
     using RulesList = List<Rule>;
+    using RuleMethod = Func<object, object, bool>;
 
     /**
      * EngineAttributes serves as a ParamObject for passing Engine data around
@@ -68,7 +69,6 @@ namespace Regla
         public RulesEngine(object component = null, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
             => EngineAttributes = new EngineAttributes(component, output, name, stopOnException, stopOnRuleFailure);
 
-
         /** 
          * Check for duplicate name before adding a new Rule with ruleName
          */
@@ -98,6 +98,21 @@ namespace Regla
             return this;
         }
 
+        /**
+         * Remove Rule by name from the RulesList
+         */
+        public bool RemoveRule(string ruleName)
+        {
+            return 1 == RulesList.RemoveAll(rule => rule.RuleAttributes.Name.Trim().ToLower() == ruleName.Trim().ToLower());
+        }
+
+        /**
+         * Remove Rule by method from the RulesList
+         */
+        public bool RemoveRule(RuleMethod ruleMethod)
+        {
+            return 1 == RulesList.RemoveAll(rule => rule.RuleMethod == ruleMethod);
+        }
         /**
          * Core method for executing rules
          * It executes rules in the given list and stores attributes

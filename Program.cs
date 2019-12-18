@@ -118,6 +118,7 @@ namespace ReglaUse
             // We can run all rules or named/group rules
             var result = engine.RunAllRules();
 
+
             // Result object has an object graph, but we can also print it as json
             Console.WriteLine("Result of RunAllRules()");
             Console.WriteLine(result);
@@ -132,6 +133,11 @@ namespace ReglaUse
             Console.WriteLine("Result of RunGroupRules()");
             Console.WriteLine(result);
 
+            if (engine.RemoveRule("Lambda"))
+                System.Console.WriteLine("Rule Lambda removed");
+
+            if (engine.RemoveRule(seniorCitizenDiscount))
+                System.Console.WriteLine("Rule seniorCitizenDiscount removed");
 
 
 
