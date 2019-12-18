@@ -113,6 +113,14 @@ namespace Regla
         {
             return 1 == RulesList.RemoveAll(rule => rule.RuleMethod == ruleMethod);
         }
+
+        /**
+         * Remove all rules belonging to a group
+         */
+        public int RemoveGroup(string groupName)
+        {
+            return RulesList.RemoveAll(rule => rule.RuleAttributes.Group.Trim().ToLower() == groupName.Trim().ToLower());
+        }
         /**
          * Core method for executing rules
          * It executes rules in the given list and stores attributes

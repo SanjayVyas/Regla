@@ -139,6 +139,8 @@ namespace ReglaUse
             if (engine.RemoveRule(seniorCitizenDiscount))
                 System.Console.WriteLine("Rule seniorCitizenDiscount removed");
 
+            System.Console.WriteLine("Remove group L1 " + engine.RemoveGroup("L1"));
+
 
 
         }
