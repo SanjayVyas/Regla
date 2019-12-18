@@ -54,10 +54,11 @@ The Engine can run in different modes e.g. RunAllRules, RunNamedRules, RunGroupR
 
 ### Simplest RuleEngine
 
-Step 1: Create an empty RuleEngine
-Step 2: Add a Rule (we are using Lambda here)
-Step 3: Run the rules
-Step 4: Inspect Result graph
+
+1. Create an empty RuleEngine
+2. Add a Rule (we are using Lambda here)
+3. Run the rules
+4. Inspect Result graph
 ```C#
 class RulesEngineDemo
 {
