@@ -1,12 +1,22 @@
-using System.Text;
+/**
+ *-----------------------------------------------------------------------------
+ * File:      Engine.cs
+ * Project:   Regla
+ * Author:    Sanjay Vyas
+ *
+ * RulesEngine module is the core
+ *      RulesEngine -> Stores a list of rules and executes them
+ *      EngineAttributes -> Keeps a set of options 
+ *          (object to operate on, output object, options etc)
+ *-----------------------------------------------------------------------------
+ * Revision History
+ *   [SV] 2019-Dec-19 1.14: Created
+ *-----------------------------------------------------------------------------
+ */
+
 using System;
 using System.Collections.Generic;
 
-/**
- * This is the core of Regla
- * RulesEngine -> Stores a list of rules and executes them
- *      EngineAttributes -> Keeps a set of options (object to operate on, output object, options etc)
- */
 namespace Regla
 {
     using RulesList = List<Rule>;
@@ -48,7 +58,6 @@ namespace Regla
         {
             return "\"EngineAttributes\": " + ReglaHelper.ToJson(this);
         }
-
     }
 
     /**
@@ -74,6 +83,7 @@ namespace Regla
         {
             return "\"Engine\": " + ReglaHelper.ToJson(this);
         }
+
         /** 
          * Check for duplicate name before adding a new Rule with ruleName
          */
@@ -81,6 +91,7 @@ namespace Regla
         {
             return RulesList.Exists(item => item.RuleAttributes.Name.Trim().ToLower() == ruleName.Trim().ToLower());
         }
+
         /**
          * AddRule methods are FluentInterface
          * They return the RuleEngine reference, enabling cascading calls
@@ -126,6 +137,7 @@ namespace Regla
         {
             return RulesList.RemoveAll(rule => rule.RuleAttributes.Group.Trim().ToLower() == groupName.Trim().ToLower());
         }
+
         /**
          * Core method for executing rules
          * It executes rules in the given list and stores attributes
@@ -158,7 +170,6 @@ namespace Regla
                     return new Result(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, rule.RuleAttributes.Name, "RuleFailure"), ruleResultAttributesList.ToArray());
             }
             return new Result(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, null, null), ruleResultAttributesList.ToArray());
-
         }
 
         /**
@@ -208,7 +219,5 @@ namespace Regla
 
             return RunRules(groupList, groupName);
         }
-
     }
-
 }

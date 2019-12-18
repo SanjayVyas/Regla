@@ -1,5 +1,17 @@
-﻿using System;
-using System.Text.Json;
+﻿/**
+ *-----------------------------------------------------------------------------
+ * File:      Program.cs
+ * Project:   Regla
+ * Author:    Sanjay Vyas
+ *
+ * This is a test program for Regla RulesEngine
+ *-----------------------------------------------------------------------------
+ * Revision History
+ *   [SV] 2019-Dec-19 1.13: Created
+ *-----------------------------------------------------------------------------
+ */
+
+using System;
 using Regla;
 
 namespace ReglaUse
@@ -59,6 +71,7 @@ namespace ReglaUse
             return true;
         }
     }
+
     class Program
     {
         /**
@@ -114,12 +127,10 @@ namespace ReglaUse
             // We can override the stop condition on a per rule bases
             engine.AddRule(new Rule((input, output) => { throw new Exception("lambda failed"); }, ruleName: "Lambda2", ruleGroupName: "L1", stopOnRuleFailure: false));
 
-
             System.Console.WriteLine(engine);
 
             // We can run all rules or named/group rules
             var result = engine.RunAllRules();
-
 
             // Result object has an object graph, but we can also print it as json
             Console.WriteLine("Result of RunAllRules()");
@@ -142,8 +153,6 @@ namespace ReglaUse
                 System.Console.WriteLine("Rule seniorCitizenDiscount removed");
 
             System.Console.WriteLine("Remove group L1 " + engine.RemoveGroup("L1"));
-
-
         }
     }
 }

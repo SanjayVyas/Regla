@@ -1,3 +1,18 @@
+/**
+ *-----------------------------------------------------------------------------
+ * File:      Rule.cs
+ * Project:   Regla
+ * Author:    Sanjay Vyas
+ *
+ * Rule represents the callback method
+ *      RuleAttributes -> Options to control the rul
+ *      Rule -> holds callback method and attributes
+ *-----------------------------------------------------------------------------
+ * Revision History
+ *   [SV] 2019-Dec-19 1.33: Created
+ *-----------------------------------------------------------------------------
+ */
+
 using System.Diagnostics;
 using System.Reflection;
 using System;
@@ -72,7 +87,6 @@ namespace Regla
                  * 
                  * In that case, find out the class name of the constructor and set it as ruleName
                  */
-
                 if (ruleName == null)
                     return new StackFrame(1).GetMethod().DeclaringType.Name;
 
@@ -114,6 +128,5 @@ namespace Regla
         {
             return "\"Rule\": " + ReglaHelper.ToJson(this); 
         }
-
     }
 }

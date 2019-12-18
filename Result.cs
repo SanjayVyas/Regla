@@ -1,13 +1,22 @@
-using System;
-using System.Text.Json;
-
 /**
+ *-----------------------------------------------------------------------------
+ * File:      Result.cs
+ * Project:   Regla
+ * Author:    Sanjay Vyas
+ *
  * This module contains classes related to Rules execution Results
  * There are 3 major classes
  * Result -> contains the overall result of the execution
- *      RunResultAttributes -> Result of the run of set of rules
- *      RuleResultAttributes -> An array containing results of individual rules
+ *     RunResultAttributes -> Result of the run of set of rules
+ *     RuleResultAttributes -> An array containing results of individual rules
+ *-----------------------------------------------------------------------------
+ * Revision History
+ *   [SV] 2019-Dec-19 1.22: Created
+ *-----------------------------------------------------------------------------
  */
+
+using System;
+
 namespace Regla
 {
     /**
@@ -87,7 +96,6 @@ namespace Regla
 
         public override string ToString()
         {
-
             return "\"Result\": " + ReglaHelper.ToJson(this);
         }
     }

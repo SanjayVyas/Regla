@@ -1,3 +1,16 @@
+/**
+ *-----------------------------------------------------------------------------
+ * File:      Regla.cs
+ * Project:   Regla
+ * Author:    Sanjay Vyas
+ *
+ * This module contains helper functions for JSon output
+ *-----------------------------------------------------------------------------
+ * Revision History
+ *   [SV] 2019-Dec-19 1.21: Created
+ *-----------------------------------------------------------------------------
+ */
+
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
