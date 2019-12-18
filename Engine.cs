@@ -75,16 +75,16 @@ namespace Regla
          * e.g.
          *      ruleEngine.AddRule(firstRule).AddRule(secondRule).AddRule(thirdRule)
          */
-        public RulesEngine AddRule(Rule rule, string name = null)
+        public RulesEngine AddRule(Rule rule)
         {
             RulesList.Add(rule);
             return this;
         }
 
-        public RulesEngine AddRule(Rule[] rules, string name = null)
+        public RulesEngine AddRule(Rule[] rules)
         {
             foreach (var rule in rules)
-                AddRule(rule, name);
+                AddRule(rule);
             return this;
         }
 
