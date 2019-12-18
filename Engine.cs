@@ -69,6 +69,13 @@ namespace Regla
             => EngineAttributes = new EngineAttributes(component, output, name, stopOnException, stopOnRuleFailure);
 
 
+        /** 
+         * Check for duplicate name before adding a new Rule with ruleName
+         */
+        private bool ruleExists(string ruleName)
+        {
+            return RulesList.Exists(item => item.RuleAttributes.Name.Trim().ToLower() == ruleName.Trim().ToLower());
+        }
         /**
          * AddRule methods are FluentInterface
          * They return the RuleEngine reference, enabling cascading calls
@@ -77,6 +84,9 @@ namespace Regla
          */
         public RulesEngine AddRule(Rule rule)
         {
+            var name = rule.RuleAttributes.Name;
+            if (ruleExists(name))
+                throw new Exception("Rule name " + name + " already exists.");
             RulesList.Add(rule);
             return this;
         }

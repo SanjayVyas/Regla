@@ -112,7 +112,7 @@ namespace ReglaUse
             engine.AddRule(new Rule((input, output) => { return false; }, ruleName: "Lambda", ruleGroupName: "L1", stopOnRuleFailure: true));
 
             // We can override the stop condition on a per rule bases
-            engine.AddRule(new Rule((input, output) => { throw new Exception("lambda failed"); }, ruleGroupName: "L1", stopOnRuleFailure: false));
+            engine.AddRule(new Rule((input, output) => { throw new Exception("lambda failed"); }, ruleName: "Lambda2", ruleGroupName: "L1", stopOnRuleFailure: false));
 
 
             // We can run all rules or named/group rules
