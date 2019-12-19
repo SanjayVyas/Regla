@@ -163,6 +163,7 @@ As we have seen, we can easily pass a method or lambda to the Rules Engine, but 
 
 ```C#
 class RulesEngineDemo
+{
     /**
      * Sample Component for RulesEngine to work on
      */
