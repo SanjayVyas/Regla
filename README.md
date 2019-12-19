@@ -162,6 +162,7 @@ class RulesEngineDemo
 As we have seen, we can easily pass a method or lambda to the Rules Engine, but to do complex processing, we may require a class with parameters and multiple functions
 
 ```C#
+class RulesEngineDemo
     /**
      * Sample Component for RulesEngine to work on
      */
