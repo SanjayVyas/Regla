@@ -33,7 +33,7 @@ namespace ReglaUse
      */
     class CustomerDiscount
     {
-        public decimal Discount { get; set; } = 5;
+        public decimal Discount { get; set; } = 0;
     }
 
     /**
@@ -183,11 +183,60 @@ namespace ReglaUse
             Console.WriteLine(engine.RunAllRules());
         }
 
+        class SeasonDiscount : IRule
+        {
+            public DateTime SeasonStart { set; get; }
+            public DateTime SeasonEnd { set; get; }
+            public decimal Discount { set; get; }
+
+            public SeasonDiscount(DateTime fromDate, DateTime toDate, decimal discount)
+            {
+                SeasonStart = fromDate;
+                SeasonEnd = toDate;
+                Discount = discount;
+            }
+
+            public bool RuleMethod(object component, object output)
+            {
+                CustomerDiscount discountObj = (CustomerDiscount)output;
+                if (DateTime.Today >= SeasonStart && DateTime.Today <= SeasonEnd)
+                    discountObj.Discount += this.Discount;
+                return true;
+            }
+        }
+
+        static void IRuleExample()
+        {
+            // Create an input object (component)
+            var customer = new Customer { ID = 1, Name = "Amitabh" };
+
+            // Create an output object (discount)
+            var discount = new CustomerDiscount();
+
+            // Create a new rule for xmas seasson
+            SeasonDiscount seasonal = new SeasonDiscount(new DateTime(2019, 12, 15), new DateTime(2019, 12, 25), 5);
+
+            // Populate the engine
+            var engine = new RulesEngine(component: customer, output: discount);
+            engine.AddRule(new Rule(seasonal));
+
+            // Run the rule
+            var result = engine.RunAllRules();
+
+            // Check if we got the discount
+            Console.WriteLine($"Seasonal discount {discount.Discount}");
+
+            // Let's inspect the result
+            Console.WriteLine(result);
+
+        }
+
         public static void Main()
         {
             BasicExample();
             DelegateExample();
             RuleClassExample();
+            IRuleExample();
         }
     }
 }

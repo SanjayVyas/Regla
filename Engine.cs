@@ -10,6 +10,7 @@
  *          (object to operate on, output object, options etc)
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 11.34: Fixed bug in EngineAttrribute ctor
  *   [SV] 2019-Dec-19 4.12: Added RemoveRule(Rule)
  *   [SV] 2019-Dec-19 3.44: Converted Rules array to params in ctor of Engine
  *   [SV] 2019-Dec-19 3.18: Fixed bug on empty Rules array in Engine ctor
@@ -56,7 +57,7 @@ namespace Regla
         public EngineAttributes(object component = null, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
         {
             this.Component = component;
-            this.Output = Output;
+            this.Output = output;
             this.Name = (name == null ? "Engine_" + ++_engineCount : name);
             this.StopOnException = stopOnException;
             this.StopOnRuleFailure = stopOnRuleFailure;

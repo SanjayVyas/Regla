@@ -10,6 +10,7 @@ using System.Data;
  *      Rule -> holds callback method and attributes
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-19 11.12: Added IRule interface and Rule(IRule...) ctor
  *   [SV] 2019-Dec-19 4.57: Added ctor Rule(Rule rule, ...)
  *   [SV] 2019-Dec-19 4.52: Fixed setNameMethod for RuleClass objects
  *   [SV] 2019-Dec-19 2.06: Added OrRule class
@@ -26,6 +27,11 @@ namespace Regla
 {
     // "#define" (or typedef) for funny Func<....>
     using RuleMethod = Func<object, object, bool>;
+
+    public interface IRule
+    {
+        bool RuleMethod(object component, object output);
+    }
 
     /**
      * Contains
@@ -109,37 +115,39 @@ namespace Regla
         }
 
         /**
-         * Unable to get implicit converter working
-         * Regular types implicit conversion works
-         * Somehow, it doesnt seem to convert a method into RuleClass... HELP!
-         */
-        public static implicit operator Rule(RuleMethod method)
-        {
-            return new Rule(method);
-        }
-
-        /**
          * Core constructor which takes method and attributes
          * Other constructors will call this
          */
         public Rule(RuleMethod method, RuleAttributes ruleAttributes)
         {
             RuleMethod = method;
-            ruleAttributes.Name = setMethodName(method, ruleAttributes.Name);
+            ruleAttributes.Name = setMethodName(RuleMethod, ruleAttributes.Name);
             RuleAttributes = ruleAttributes;
         }
 
+        public Rule(IRule rule, RuleAttributes ruleAttributes)
+        {
+            RuleMethod = rule.RuleMethod;
+            RuleAttributes = (ruleAttributes == null ? new RuleAttributes() : ruleAttributes);
+            ruleAttributes.Name = setMethodName(RuleMethod, ruleAttributes.Name);
+
+        }
         /**
          * Spread parametrize constructor, making it easy for caller
          * so that they don't have to create an object of RuleAttributes just to create a rule
          */
-        public Rule(RuleMethod method = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
-            : this(method, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        public Rule(RuleMethod ruleMethod = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : this(ruleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 
         public Rule(Rule rule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
             : this(rule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        {
+        }
+
+        public Rule(IRule iRule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : this(iRule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 
@@ -172,7 +180,7 @@ namespace Regla
         }
 
         public AndRule(string ruleName = null, params Rule[] rulesArray)
-            : base(null, ruleName)
+            : base((Rule)null, ruleName)
         {
             RuleMethod = andMethod;
             andRules = rulesArray;
@@ -204,7 +212,7 @@ namespace Regla
         }
 
         public OrRule(string ruleName = null, params Rule[] rulesArray)
-            : base(null, ruleName)
+            : base((Rule)null, ruleName)
         {
             RuleMethod = orMethod;
             orRules = rulesArray;
