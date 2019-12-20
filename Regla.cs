@@ -7,6 +7,7 @@
  * This module contains helper functions for JSon output
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-20 1.59: Fixed unicode in Json
  *   [SV] 2019-Dec-19 1.21: Created
  *-----------------------------------------------------------------------------
  */
