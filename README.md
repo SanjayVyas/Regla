@@ -17,6 +17,7 @@ Rule encapsulates a method to call and its attributes
 RuleMethod can be provided in 3 forms
 1. A delegate function
 2. A lambda expression
+3. A class implementing IRule
 3. A class inherited from Rule class
 
 Class Name | Description
@@ -64,19 +65,24 @@ class RulesEngineDemo
 {
     static void BasicExample()
     {
-        // Create an empty RulesEngine
-        var myRules = new RulesEngine();
+        static void BasicExample()
+        {
+            // Create an empty RulesEngine with no Component or output object
+            var myRules = new RulesEngine<None, None>();
 
-        // Add a lambda rule to the engine
-        myRules.AddRule(new Rule((component, output) => { Console.WriteLine("Hello, world"); return true; }));
+            // Add a lambda rule to the engine
+            myRules.AddRule(new Rule<None, None>((component, output) => { Console.WriteLine("Hello, world"); return true; }));
 
-        // Run the engine, it will print Hello, world
-        var result = myRules.RunAllRules();
-        // Hello, world
+            // Run the engine, it will print Hello, world
+            var result = myRules.RunAllRules();
+            // Hello, world
 
-        // Result class contains detailed object graph, which can be accessed thru properties
-        // It's ToString() returns a Json string
-        Console.WriteLine(result);
+            // Result class contains detailed object graph
+            // Which can be accessed thru properties
+            // It's ToString() returns a Json string
+            Console.WriteLine(result);
+        }
+
 
     }
     public static void Main()
@@ -127,8 +133,9 @@ Rules can be delegates, Func<>, lambda or even classes
 ```C#
 class RulesEngineDemo
 {
-    // Define a rule delegate method
-    static bool ruleDelegate(object component, object output)
+    // Define a rule delegate method with empty class
+    // as we don't want to operator on any object or output
+    static bool ruleDelegate(None component, None output)
     {
         Console.WriteLine("ruleDelegate called");
         return false;
@@ -137,23 +144,22 @@ class RulesEngineDemo
     static void DelegateExample()
     {
         // Create EngineAttributes with Name
-        var engineOptions = new EngineAttributes { Name = "MyEngine" };
+        var engineOptions = new EngineAttributes<None, None> { Name = "MyEngine" };
 
         // Instantiate the RulesEngine with option
-        var myEngine = new RulesEngine(engineOptions);
+        var myEngine = new RulesEngine<None, None>(engineOptions);
 
         // Now add Lambda rule
-        myEngine.AddRule(new Rule((c, o) => { Console.WriteLine("Hello, world"); return true; }));
+        myEngine.AddRule(new Rule<None, None>((c, o) => { Console.WriteLine("Hello, world"); return true; }));
 
         // Next, add a delegate method
-        myEngine.AddRule(new Rule(ruleDelegate));
+        myEngine.AddRule(new Rule<None, None>(ruleDelegate));
 
         myEngine.RunAllRules();
         // Output:
         // Hello, world
         // ruleDelegate called
     }
-
     public static void Main()
     {
         DelegateExample();
@@ -185,15 +191,15 @@ class RulesEngineDemo
         public decimal Discount { get; set; };
     }
 
-    /**
+     /**
      * Rules can be written as methods, lambdas or even classes
      * Class rules allow us to pass constructor params, which can be used later
      * e.g.
-     *      engine.AddRule(new LoyaltyDiscount(1, 0.05));
-     *      engine.AddRule(new LoyaltyDiscount(5, 0.08);
-     *      engine.AddRule(new LoyaltyDiscount(10, 0.10));
+     *      engine.AddRule(new LoyaltyDiscount(1, 0.05)), "L1");
+     *      engine.AddRule(new LoyaltyDiscount(5, 0.08), "L2");
+     *      engine.AddRule(new LoyaltyDiscount(10, 0.10), "L3");
      */
-    public class LoyaltyDiscount : Rule
+    class LoyaltyDiscount : Rule<Customer, CustomerDiscount>
     {
         public int Years { get; private set; }
         public decimal Discount { get; private set; }
@@ -209,57 +215,53 @@ class RulesEngineDemo
 
         /**
          * The actual rule can be called anything, but must have matching signature
+         * Due to generics, we have better type safety in parameters
          */
-        public bool CalculateDiscount(object input, object output)
+        public bool CalculateDiscount(Customer customer, CustomerDiscount discount)
         {
-            var customer = (Customer)input;
-            var customerDiscount = (CustomerDiscount)output;
             if ((DateTime.Today - customer.FirstPurchase).Days / 365 > Years)
-                customerDiscount.Discount = Math.Max(customerDiscount.Discount, 50);
+                discount.Discount = Math.Max(discount.Discount, 50);
             return true;
         }
     }
 
-    static void RuleClassExample()
-    {
-        /**
-         * Create the component to initialize the RulesEngine
-         * We don't HAVE to have a component, the rules can still run
-         */
-        var bigB = new Customer
+        static void RuleClassExample()
         {
-            ID = 1,
-            Name = "Amitabh",
-            Birthdate = new DateTime(1942, 10, 11),
-            FirstPurchase = new DateTime(2005, 1, 2),
-        };
+            /**
+             * Create the component to initialize the RulesEngine
+             * We don't HAVE to have a component, the rules can still run
+             */
+            var bigB = new Customer
+            {
+                ID = 1,
+                Name = "Amitabh",
+                Birthdate = new DateTime(1942, 10, 11),
+                FirstPurchase = new DateTime(2005, 1, 2),
+            };
 
-        /**
-         * Create an output object for Rules Engine
-         * We don't HAVE to have an output object
-         */
-        var discount = new CustomerDiscount();
+            /**
+             * Create an output object for Rules Engine
+             * We don't HAVE to have an output object
+             */
+            var discount = new CustomerDiscount();
 
-        // Create Engine Attributes
-        var engineAttributes = new EngineAttributes { Component = bigB, Output = discount };
+            // Create Engine Attributes
+            var engineAttributes = new EngineAttributes<Customer, CustomerDiscount> { Component = bigB, Output = discount };
 
-        // We can add individual rules or an array of rules
-        var rulesArray = new Rule[] { new Rule(seniorCitizenDiscount, ruleName: "Senior") };
+            // We can add individual rules or an array of rules
+            var rulesArray = new Rule<Customer, CustomerDiscount>[] { new Rule<Customer, CustomerDiscount>(seniorCitizenDiscount, ruleName: "Senior") };
 
-        // Start the engine with attributes and initial rules list
-        var engine = new RulesEngine(engineAttributes, rulesArray);
+            // Start the engine with attributes and initial rules list
+            var engine = new RulesEngine<Customer, CustomerDiscount>(engineAttributes, rulesArray);
 
-        // We are adding multiple rules based on the same class, so we must name them explicitly
-        engine.AddRule(new Rule(new LoyaltyDiscount(1, 5), ruleName: "L1"));
-        engine.AddRule(new Rule(new LoyaltyDiscount(5, 8), ruleName: "L2"));
-        engine.AddRule(new Rule(new LoyaltyDiscount(10, 10), ruleName: "L3"));
+            // We are adding multiple rules based on the same class, so we must name them explicitly
+            engine.AddRule(new Rule<Customer, CustomerDiscount>(new LoyaltyDiscount(1, 5), ruleName: "L1"));
+            engine.AddRule(new Rule<Customer, CustomerDiscount>(new LoyaltyDiscount(5, 8), ruleName: "L2"));
+            engine.AddRule(new Rule<Customer, CustomerDiscount>(new LoyaltyDiscount(10, 10), ruleName: "L3"));
 
-        Console.WriteLine(engine.RunAllRules());
-
-        // Now print the discount
-        Console.WriteLine(discount);
+            Console.WriteLine(engine.RunAllRules());
         }
-    }
+
 
     public static void Main()
     {
@@ -288,16 +290,16 @@ A rule can have a user defined name and/or a group, which can be used to run nam
 :
 :
 // Define a new rule using a delegate method
-var seniorRule = new Rule(seniorCitizenDiscount, name:"senior", group:"discount", stopOnException:true, stopOnRuleFailure:true);
+var seniorRule = new Rule<Customer, CustomerDiscount>(seniorCitizenDiscount, name:"senior", group:"discount", stopOnException:true, stopOnRuleFailure:true);
 
 // Add another rule for birthday
-var birthdayRule = new Rule(birthdayDiscount, group:"discount");
+var birthdayRule = new Rule<Customer, CustomerDiscount>(birthdayDiscount, group:"discount");
 
 // Add a rule for seasonal discount (not part of group:discount)
-var seasonalDiscount = new Rule(new SeasonDiscount(), group:"seasonal"));
+var seasonalDiscount = new Rule<Customer, CustomerDiscount>(new SeasonDiscount(), group:"seasonal"));
 
 // Instantiate the engine with component and output
-var engine=new RulesEngine(component:customer, output:discount, name:"CustomerRule");
+var engine=new RulesEngine<Customer, CustomerDiscount>(component:customer, output:discount, name:"CustomerRule");
 
 // Run only those rules which are part of "discount" group
 var groupResult = engine.RunGroupRules("discount");

@@ -99,7 +99,7 @@ namespace ReglaUse
 
         static void BasicExample()
         {
-            // Create an empty RulesEngine
+            // Create an empty RulesEngine with no Component or output object
             var myRules = new RulesEngine<None, None>();
 
             // Add a lambda rule to the engine
@@ -117,7 +117,7 @@ namespace ReglaUse
         }
 
         // Define a rule delegate method
-        static bool ruleDelegate(object component, object output)
+        static bool ruleDelegate(None component, None output)
         {
             Console.WriteLine("ruleDelegate called");
             return false;
@@ -230,10 +230,10 @@ namespace ReglaUse
 
         public static void Main()
         {
-            BasicExample();
+            //BasicExample();
             DelegateExample();
-            RuleClassExample();
-            IRuleExample();
+            // RuleClassExample();
+            // IRuleExample();
         }
     }
 }
