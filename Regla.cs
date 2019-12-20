@@ -12,8 +12,10 @@
  */
 
 using System;
+using System.Text.Unicode;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Encodings.Web;
 
 namespace Regla
 {
@@ -28,6 +30,9 @@ namespace Regla
 
             // We need pretty print (indented)
             options.WriteIndented = true;
+
+            // Convert lambda names from \u300CBasic\u300E to <Basic>
+            options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 
             // There seems to be limitation of JsonSerializer, which we need to work around
             options.Converters.Add(new RuleMethodConverter());
