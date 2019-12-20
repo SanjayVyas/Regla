@@ -265,4 +265,7 @@ namespace Regla
             return RunRules(groupList, groupName);
         }
     }
+
+    public class EngineAttributes : EngineAttributes<object, object> { }
+    public class RulesEngine : RulesEngine<object, object> { }
 }

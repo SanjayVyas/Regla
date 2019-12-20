@@ -104,4 +104,21 @@ namespace Regla
             return "\"Result\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
     }
+
+    public class RuleResultAttributes : RuleResultAttributes<object, object>
+    {
+        public RuleResultAttributes(Rule<object, object> rule, bool ReturnValue, Exception exception)
+            : base(rule, ReturnValue, exception)
+        { }
+    }
+
+
+    public class Result : Result<object, object>
+    {
+        public Result(EngineAttributes<object, object> engineAttributes, RunResultAttributes runResultAttributes, RuleResultAttributes<object, object>[] ruleResultAttributes)
+            : base(engineAttributes, runResultAttributes, ruleResultAttributes)
+        {
+
+        }
+    }
 }

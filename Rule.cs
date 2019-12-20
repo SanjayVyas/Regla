@@ -136,6 +136,7 @@ namespace Regla
             ruleAttributes.Name = setMethodName(RuleMethod, ruleAttributes.Name);
 
         }
+
         /**
          * Spread parametrize constructor, making it easy for caller
          * so that they don't have to create an object of RuleAttributes just to create a rule
@@ -226,4 +227,37 @@ namespace Regla
             orRules = rulesArray;
         }
     }
+
+    public interface IRule : IRule<object, object> { }
+    internal class AndRule : AndRule<object, object> { }
+    internal class OrRule : OrRule<object, object> { }
+    public class Rule : Rule<object, object>
+    {
+        public Rule(Func<object, object, bool> method, RuleAttributes ruleAttributes)
+            : base(method, ruleAttributes)
+        {
+        }
+
+        public Rule(IRule<object, object> rule, RuleAttributes ruleAttributes)
+            : base(rule, ruleAttributes)
+        {
+        }
+
+        public Rule(Func<object, object, bool> ruleMethod = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : base(ruleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        {
+        }
+
+        public Rule(Rule rule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : base(rule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        {
+        }
+
+        public Rule(IRule iRule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+            : base(iRule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
+        {
+        }
+
+    }
+
 }

@@ -225,15 +225,33 @@ namespace ReglaUse
 
             // Let's inspect the result
             Console.WriteLine(result);
+        }
 
+
+        public static bool NonGenericDelegate(object c, object o)
+        {
+            Console.WriteLine("Non generic delegate called");
+            return true;
+
+        }
+
+        public static void NonGenericBasicExample()
+        {
+            var engine = new RulesEngine();
+            var rule = new Rule((c, o) => { Console.WriteLine("None generic called"); return true; });
+            var ruleDelegate = new Rule(NonGenericDelegate);
+            engine.AddRule(ruleDelegate);
+            engine.AddRule(rule);
+            Console.WriteLine(engine.RunAllRules());
         }
 
         public static void Main()
         {
             //BasicExample();
-            DelegateExample();
+            // DelegateExample();
             // RuleClassExample();
             // IRuleExample();
+            NonGenericBasicExample();
         }
     }
 }

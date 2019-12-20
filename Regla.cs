@@ -89,6 +89,4 @@ namespace Regla
                 JsonSerializerOptions options) =>
                     writer.WriteStringValue(value.Message);
     }
-
-
 }
