@@ -84,39 +84,40 @@ class RulesEngineDemo
         BasicExample();
     }
 }
-// "Result": {
-//   "EngineAttributes": {
-//     "Name": "Engine_1",
-//     "StopOnException": true,
-//     "StopOnRuleFailure": false,
-//     "Component": null,
-//     "Output": null
-//   },
-//   "RunResultAttributes": {
-//     "TotalRulesCount": 1,
-//     "RulesExecutedCount": 1,
-//     "ExecutionType": "All",
-//     "FailedRuleName": null,
-//     "FailureReason": null
-//   },
-//   "RuleResultAttributes": [
-//     {
-//       "Rule": {
-//         "RuleMethod": "\u003CMain\u003Eb__3_0",
-//         "RuleAttributes": {
-//           "Name": "\u003CMain\u003Eb__3_0",
-//           "Group": "default",
-//           "Enabled": true,
-//           "StopOnException": true,
-//           "StopOnRuleFailure": false
-//         }
-//       },
-//       "ReturnValue": true,
-//       "Exception": null
-//     }
-//   ]
-// }
-```
+/* The output
+Hello, world
+"Result": {
+  "EngineAttributes": {
+    "Name": "Engine_1",
+    "StopOnException": true,
+    "StopOnRuleFailure": false,
+    "Component": null,
+    "Output": null
+  },
+  "RunResultAttributes": {
+    "TotalRulesCount": 1,
+    "RulesExecutedCount": 1,
+    "ExecutionType": "All",
+    "FailedRuleName": null,
+    "FailureReason": null
+  },
+  "RuleResultAttributes": [
+    {
+      "Rule": {
+        "RuleMethod": "<BasicExample>b__3_0",
+        "RuleAttributes": {
+          "Name": "<BasicExample>b__3_0",
+          "Group": "default",
+          "Enabled": true,
+          "StopOnException": true,
+          "StopOnRuleFailure": false
+        }
+      },
+      "ReturnValue": true,
+      "Exception": null
+    }
+  ]
+}*/```
 While the output looks very detailed, we don't have to worry about it yet. The Result object graph can be used to analyze and debug our RulesEngine
 
 ### Different ways of specifying rule

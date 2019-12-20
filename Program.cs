@@ -234,9 +234,9 @@ namespace ReglaUse
         public static void Main()
         {
             BasicExample();
-            DelegateExample();
-            RuleClassExample();
-            IRuleExample();
+            // DelegateExample();
+            // RuleClassExample();
+            // IRuleExample();
         }
     }
 }
