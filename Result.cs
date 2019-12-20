@@ -11,12 +11,13 @@
  *     RuleResultAttributes -> An array containing results of individual rules
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-20 11.38: Made JsonSerializer call generics
+ *   [SV] 2019-Dec-20 11.38: Added generics
  *   [SV] 2019-Dec-19 1.22: Created
  *-----------------------------------------------------------------------------
  */
 
 using System;
-
 namespace Regla
 {
     /**
@@ -25,13 +26,15 @@ namespace Regla
      *      ReturnValue -> If there was no exception, then what was the result
      *      Exception -> If there was an exception, the exact exception object
      */
-    public class RuleResultAttributes : ReglaAttributes
+    public class RuleResultAttributes<COMPONENT, OUTPUT> : ReglaAttributes
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        public Rule Rule { private set; get; }
+        public Rule<COMPONENT, OUTPUT> Rule { private set; get; }
         public bool ReturnValue { private set; get; }
         public Exception Exception { private set; get; }
 
-        public RuleResultAttributes(Rule rule, bool returnValue, Exception exception)
+        public RuleResultAttributes(Rule<COMPONENT, OUTPUT> rule, bool returnValue, Exception exception)
         {
             this.Rule = rule;
             this.ReturnValue = returnValue;
@@ -40,7 +43,7 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"RuleResultAttributes\": " + ReglaHelper.ToJson(this);
+            return "\"RuleResultAttributes\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
     }
 
@@ -71,7 +74,7 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"RunResultAttributes\": " + ReglaHelper.ToJson(this);
+            return "\"RunResultAttributes\": " + ReglaHelper.ToJson<None, None>(this);
         }
     }
 
@@ -81,13 +84,15 @@ namespace Regla
      *      RunResultAttribute -> Overall statistics about the execution
      *      RulesResultAttributes -> Array of results of individual rules
      */
-    public class Result
+    public class Result<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        public EngineAttributes EngineAttributes { private set; get; }
+        public EngineAttributes<COMPONENT, OUTPUT> EngineAttributes { private set; get; }
         public RunResultAttributes RunResultAttributes { private set; get; }
-        public RuleResultAttributes[] RuleResultAttributes { private set; get; }
+        public RuleResultAttributes<COMPONENT, OUTPUT>[] RuleResultAttributes { private set; get; }
 
-        public Result(EngineAttributes engineAttributes, RunResultAttributes runResultAttributes, RuleResultAttributes[] ruleResultAttributes)
+        public Result(EngineAttributes<COMPONENT, OUTPUT> engineAttributes, RunResultAttributes runResultAttributes, RuleResultAttributes<COMPONENT, OUTPUT>[] ruleResultAttributes)
         {
             this.EngineAttributes = engineAttributes;
             this.RunResultAttributes = runResultAttributes;
@@ -96,7 +101,7 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"Result\": " + ReglaHelper.ToJson(this);
+            return "\"Result\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
     }
 }

@@ -10,6 +10,8 @@ using System.Data;
  *      Rule -> holds callback method and attributes
  *-----------------------------------------------------------------------------
  * Revision History
+ *   [SV] 2019-Dec-20 11.39: Made JsonSerializer call generic
+ *   [SV] 2019-Dec-20 11.39: Added generics
  *   [SV] 2019-Dec-19 11.12: Added IRule interface and Rule(IRule...) ctor
  *   [SV] 2019-Dec-19 4.57: Added ctor Rule(Rule rule, ...)
  *   [SV] 2019-Dec-19 4.52: Fixed setNameMethod for RuleClass objects
@@ -25,12 +27,12 @@ using System;
 
 namespace Regla
 {
-    // "#define" (or typedef) for funny Func<....>
-    using RuleMethod = Func<object, object, bool>;
 
-    public interface IRule
+    public interface IRule<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        bool RuleMethod(object component, object output);
+        bool RuleMethod(COMPONENT component, OUTPUT output);
     }
 
     /**
@@ -60,7 +62,7 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"RuleAttributes\":" + ReglaHelper.ToJson(this);
+            return "\"RuleAttributes\":" + ReglaHelper.ToJson<None, None>(this);
         }
     }
 
@@ -70,16 +72,18 @@ namespace Regla
      *      RuleMethod -> A delegate to the method to be called
      *      RuleAttributes -> Various options for the rule
      */
-    public class Rule
+    public class Rule<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        public virtual RuleMethod RuleMethod { protected set; get; }
+        public virtual Func<COMPONENT, OUTPUT, bool> RuleMethod { protected set; get; }
         public RuleAttributes RuleAttributes { set; get; }
 
         /**
          * To make it simple for the user, we can figure out the rule name
          * from the calling method or class
          */
-        private string setMethodName(RuleMethod method, string ruleName)
+        private string setMethodName(Func<COMPONENT, OUTPUT, bool> method, string ruleName)
         {
             /** 
              * A Rule method may not be set in constructor, so it can be null
@@ -118,14 +122,14 @@ namespace Regla
          * Core constructor which takes method and attributes
          * Other constructors will call this
          */
-        public Rule(RuleMethod method, RuleAttributes ruleAttributes)
+        public Rule(Func<COMPONENT, OUTPUT, bool> method, RuleAttributes ruleAttributes)
         {
             RuleMethod = method;
             ruleAttributes.Name = setMethodName(RuleMethod, ruleAttributes.Name);
             RuleAttributes = ruleAttributes;
         }
 
-        public Rule(IRule rule, RuleAttributes ruleAttributes)
+        public Rule(IRule<COMPONENT, OUTPUT> rule, RuleAttributes ruleAttributes)
         {
             RuleMethod = rule.RuleMethod;
             RuleAttributes = (ruleAttributes == null ? new RuleAttributes() : ruleAttributes);
@@ -136,24 +140,24 @@ namespace Regla
          * Spread parametrize constructor, making it easy for caller
          * so that they don't have to create an object of RuleAttributes just to create a rule
          */
-        public Rule(RuleMethod ruleMethod = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+        public Rule(Func<COMPONENT, OUTPUT, bool> ruleMethod = null, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
             : this(ruleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 
-        public Rule(Rule rule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+        public Rule(Rule<COMPONENT, OUTPUT> rule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
             : this(rule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 
-        public Rule(IRule iRule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
+        public Rule(IRule<COMPONENT, OUTPUT> iRule, string ruleName = null, string ruleGroupName = "default", bool ruleEnabled = true, bool stopOnException = true, bool stopOnRuleFailure = false)
             : this(iRule.RuleMethod, new RuleAttributes(ruleName, ruleGroupName, ruleEnabled, stopOnException, stopOnRuleFailure))
         {
         }
 
         public override string ToString()
         {
-            return "\"Rule\": " + ReglaHelper.ToJson(this);
+            return "\"Rule\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
     }
 
@@ -163,11 +167,13 @@ namespace Regla
      * AndRule will continue executing rules until one returns false
      * If non return false, the final outcome is true
      */
-    internal class AndRule : Rule
+    internal class AndRule<COMPONENT, OUTPUT> : Rule<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        Rule[] andRules = null;
+        Rule<COMPONENT, OUTPUT>[] andRules = null;
 
-        private bool andMethod(object component, object output)
+        private bool andMethod(COMPONENT component, OUTPUT output)
         {
             bool result = false;
             foreach (var rule in andRules)
@@ -179,8 +185,8 @@ namespace Regla
             return true;
         }
 
-        public AndRule(string ruleName = null, params Rule[] rulesArray)
-            : base((Rule)null, ruleName)
+        public AndRule(string ruleName = null, params Rule<COMPONENT, OUTPUT>[] rulesArray)
+            : base((Rule<COMPONENT, OUTPUT>)null, ruleName)
         {
             RuleMethod = andMethod;
             andRules = rulesArray;
@@ -193,12 +199,14 @@ namespace Regla
      * OrRule will continue executing rules until one returns true
      * If none return true, the final outcome is false
      */
-    internal class OrRule : Rule
+    internal class OrRule<COMPONENT, OUTPUT> : Rule<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        public override RuleMethod RuleMethod { protected set; get; }
-        public Rule[] orRules { private set; get; } = null;
+        public override Func<COMPONENT, OUTPUT, bool> RuleMethod { protected set; get; }
+        public Rule<COMPONENT, OUTPUT>[] orRules { private set; get; } = null;
 
-        private bool orMethod(object component, object output)
+        private bool orMethod(COMPONENT component, OUTPUT output)
         {
             bool result = false;
             foreach (var rule in orRules)
@@ -211,8 +219,8 @@ namespace Regla
             return false;
         }
 
-        public OrRule(string ruleName = null, params Rule[] rulesArray)
-            : base((Rule)null, ruleName)
+        public OrRule(string ruleName = null, params Rule<COMPONENT, OUTPUT>[] rulesArray)
+            : base((Rule<COMPONENT, OUTPUT>)null, ruleName)
         {
             RuleMethod = orMethod;
             orRules = rulesArray;

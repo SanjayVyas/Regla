@@ -10,7 +10,9 @@
  *          (object to operate on, output object, options etc)
  *-----------------------------------------------------------------------------
  * Revision History
- *   [SV] 2019-Dec-19 11.34: Fixed bug in EngineAttrribute ctor
+ *   [SV] 2019-Dec-20 11.38: Made JSonSerializer call generics
+ *   [SV] 2019-Dec-20 11.38: Added Generics
+ *   [SV] 2019-Dec-19 11.34: Fixed bug in EngineAttribute ctor
  *   [SV] 2019-Dec-19 4.12: Added RemoveRule(Rule)
  *   [SV] 2019-Dec-19 3.44: Converted Rules array to params in ctor of Engine
  *   [SV] 2019-Dec-19 3.18: Fixed bug on empty Rules array in Engine ctor
@@ -28,9 +30,6 @@ using System.Collections.Generic;
 
 namespace Regla
 {
-    using RulesList = List<Rule>;
-    using RuleMethod = Func<object, object, bool>;
-
     /**
      * EngineAttributes serves as a ParamObject for passing Engine data around
      * All parameters are kept optional, so that its easy for user to build th engine
@@ -45,16 +44,19 @@ namespace Regla
      *      and will be passed back to user methods, when the rule runs
      * 
      */
-    public class EngineAttributes : ReglaAttributes
+    public class EngineAttributes<COMPONENT, OUTPUT> : ReglaAttributes
+        where COMPONENT : class
+        where OUTPUT : class
     {
+
         private static int _engineCount = 0;
         public string Name { set; get; }
         public bool StopOnException { set; get; } = true;
         public bool StopOnRuleFailure { set; get; } = false;
-        public object Component { set; get; } = null;
-        public object Output { set; get; } = null;
+        public COMPONENT Component { set; get; } = null;
+        public OUTPUT Output { set; get; } = null;
 
-        public EngineAttributes(object component = null, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
+        public EngineAttributes(COMPONENT component = null, OUTPUT output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
         {
             this.Component = component;
             this.Output = output;
@@ -65,7 +67,7 @@ namespace Regla
 
         public override string ToString()
         {
-            return "\"EngineAttributes\": " + ReglaHelper.ToJson(this);
+            return "\"EngineAttributes\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
     }
 
@@ -74,24 +76,26 @@ namespace Regla
      *      EngineAttributes -> Various options set by the user
      *      RulesList -> A list of rule methods provided by the user, which will be called back
      */
-    public class RulesEngine
+    public class RulesEngine<COMPONENT, OUTPUT>
+        where COMPONENT : class
+        where OUTPUT : class
     {
-        public EngineAttributes EngineAttributes { private set; get; }
-        public RulesList RulesList { private set; get; } = new RulesList();
+        public EngineAttributes<COMPONENT, OUTPUT> EngineAttributes { private set; get; }
+        public List<Rule<COMPONENT, OUTPUT>> RulesList { private set; get; } = new List<Rule<COMPONENT, OUTPUT>>();
 
-        public RulesEngine(EngineAttributes engineAttributes = null, params Rule[] rulesArray)
+        public RulesEngine(EngineAttributes<COMPONENT, OUTPUT> engineAttributes = null, params Rule<COMPONENT, OUTPUT>[] rulesArray)
         {
-            EngineAttributes = (engineAttributes == null ? new EngineAttributes() : engineAttributes);
+            EngineAttributes = (engineAttributes == null ? new EngineAttributes<COMPONENT, OUTPUT>() : engineAttributes);
             if (rulesArray != null)
                 RulesList.AddRange(rulesArray);
         }
 
-        public RulesEngine(object component, object output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
-            => EngineAttributes = new EngineAttributes(component, output, name, stopOnException, stopOnRuleFailure);
+        public RulesEngine(COMPONENT component, OUTPUT output = null, string name = null, bool stopOnException = true, bool stopOnRuleFailure = false)
+            => EngineAttributes = new EngineAttributes<COMPONENT, OUTPUT>(component, output, name, stopOnException, stopOnRuleFailure);
 
         public override string ToString()
         {
-            return "\"Engine\": " + ReglaHelper.ToJson(this);
+            return "\"Engine\": " + ReglaHelper.ToJson<COMPONENT, OUTPUT>(this);
         }
 
         /** 
@@ -108,7 +112,7 @@ namespace Regla
          * e.g.
          *      ruleEngine.AddRule(firstRule).AddRule(secondRule).AddRule(thirdRule)
          */
-        public RulesEngine AddRule(Rule rule)
+        public RulesEngine<COMPONENT, OUTPUT> AddRule(Rule<COMPONENT, OUTPUT> rule)
         {
             var name = rule.RuleAttributes.Name;
             if (ruleExists(name))
@@ -117,7 +121,7 @@ namespace Regla
             return this;
         }
 
-        public RulesEngine AddRule(params Rule[] rules)
+        public RulesEngine<COMPONENT, OUTPUT> AddRule(params Rule<COMPONENT, OUTPUT>[] rules)
         {
             foreach (var rule in rules)
                 AddRule(rule);
@@ -127,17 +131,17 @@ namespace Regla
         /**
          * AddAndRule adds AndRule class which short circuits of false rule
          */
-        public RulesEngine AddAndRules(string ruleName = null, params Rule[] rules)
+        public RulesEngine<COMPONENT, OUTPUT> AddAndRules(string ruleName = null, params Rule<COMPONENT, OUTPUT>[] rules)
         {
-            return AddRule(new AndRule(ruleName, rules));
+            return AddRule(new AndRule<COMPONENT, OUTPUT>(ruleName, rules));
         }
 
         /**
          * AndOrRule adds OrRule class which short circuits on true rule
          */
-        public RulesEngine AddOrRules(string ruleName = null, params Rule[] rules)
+        public RulesEngine<COMPONENT, OUTPUT> AddOrRules(string ruleName = null, params Rule<COMPONENT, OUTPUT>[] rules)
         {
-            return AddRule(new OrRule(ruleName, rules));
+            return AddRule(new OrRule<COMPONENT, OUTPUT>(ruleName, rules));
         }
 
         /**
@@ -151,12 +155,12 @@ namespace Regla
         /**
          * Remove Rule by method from the RulesList
          */
-        public bool RemoveRule(RuleMethod ruleMethod)
+        public bool RemoveRule(Func<COMPONENT, OUTPUT, bool> ruleMethod)
         {
             return 1 == RulesList.RemoveAll(rule => rule.RuleMethod == ruleMethod);
         }
 
-        public bool RemoveRule(Rule rule)
+        public bool RemoveRule(Rule<COMPONENT, OUTPUT> rule)
         {
             return RulesList.Remove(rule);
         }
@@ -183,15 +187,15 @@ namespace Regla
          * Core method for executing rules
          * It executes rules in the given list and stores attributes
          */
-        private Result RunRules(RulesList rulesList, string executionType)
+        private Result<COMPONENT, OUTPUT> RunRules(List<Rule<COMPONENT, OUTPUT>> rulesList, string executionType)
         {
             // We need to capture result of each rule in the list
-            var ruleResultAttributesList = new List<RuleResultAttributes>();
+            var ruleResultAttributesList = new List<RuleResultAttributes<COMPONENT, OUTPUT>>();
 
             // Number of rules executed could be less, due to stoppin on failure
             int rulesExecutedCount = 0;
 
-            foreach (var rule in rulesList)
+            foreach (Rule<COMPONENT, OUTPUT> rule in rulesList)
             {
                 bool runResult = false;
                 Exception exception = null;
@@ -199,25 +203,25 @@ namespace Regla
                 // We do not want Exception to be propagated to caller, instead will will capture it
                 try { runResult = rule.RuleMethod(EngineAttributes.Component, EngineAttributes.Output); }
                 catch (Exception e) { exception = e; }
-                finally { ruleResultAttributesList.Add(new RuleResultAttributes(rule, runResult, exception)); }
+                finally { ruleResultAttributesList.Add(new RuleResultAttributes<COMPONENT, OUTPUT>(rule, runResult, exception)); }
 
                 rulesExecutedCount++;
 
                 // Rule may fail due to global option or per-rule option
                 if (exception != null && (EngineAttributes.StopOnException || rule.RuleAttributes.StopOnException))
-                    return new Result(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, rule.RuleAttributes.Name, "Exception"), ruleResultAttributesList.ToArray());
+                    return new Result<COMPONENT, OUTPUT>(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, rule.RuleAttributes.Name, "Exception"), ruleResultAttributesList.ToArray());
 
                 if (runResult == false && (EngineAttributes.StopOnRuleFailure || rule.RuleAttributes.StopOnRuleFailure))
-                    return new Result(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, rule.RuleAttributes.Name, "RuleFailure"), ruleResultAttributesList.ToArray());
+                    return new Result<COMPONENT, OUTPUT>(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, rule.RuleAttributes.Name, "RuleFailure"), ruleResultAttributesList.ToArray());
             }
-            return new Result(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, null, null), ruleResultAttributesList.ToArray());
+            return new Result<COMPONENT, OUTPUT>(EngineAttributes, new RunResultAttributes(rulesList.Count, rulesExecutedCount, executionType, null, null), ruleResultAttributesList.ToArray());
         }
 
         /**
          * Wrapper method, which calls internal RunRules
          * It basically passes the entire rule list
          */
-        public Result RunAllRules()
+        public Result<COMPONENT, OUTPUT> RunAllRules()
         {
             return RunRules(RulesList, "All");
         }
@@ -225,10 +229,10 @@ namespace Regla
         /**
          * Run rules with specified names only
          */
-        public Result RunNamedRules(string[] ruleNames)
+        public Result<COMPONENT, OUTPUT> RunNamedRules(string[] ruleNames)
         {
             // Convert ruleNames array into trimmed lower case, so that we don't do in inside the loop
-            var namedList = new RulesList();
+            var namedList = new List<Rule<COMPONENT, OUTPUT>>();
             for (var i = 0; i < ruleNames.Length; i++)
                 ruleNames[i] = ruleNames[i].Trim().ToLower();
 
@@ -245,10 +249,10 @@ namespace Regla
         /**
          * Rule can have a common group and we can run rules part of a group
          */
-        public Result RunGroupRules(string groupName)
+        public Result<COMPONENT, OUTPUT> RunGroupRules(string groupName)
         {
             // Let's not do conversion inside the loop
-            var groupList = new RulesList();
+            var groupList = new List<Rule<COMPONENT, OUTPUT>>();
             groupName = groupName.Trim().ToLower();
 
             // If the rule's group matches the given group name, add to execution list
